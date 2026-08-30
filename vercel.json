@@ -3,10 +3,7 @@
   "bunVersion": "1.x",
   "installCommand": "cd archify && bun install",
   "functions": {
-    "api/render.mjs": {
-      "maxDuration": 30
-    },
-    "api/validate.mjs": {
+    "api/index.mjs": {
       "maxDuration": 30
     }
   }
