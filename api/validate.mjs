@@ -219,7 +219,3 @@ export default async function handler(request) {
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
-
-export const config = {
-  runtime: 'bun',
-};
