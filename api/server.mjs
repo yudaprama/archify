@@ -102,8 +102,8 @@ async function handleValidate(request) {
 Bun.serve({
   fetch(request) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/render') return handleRender(request);
-    if (url.pathname === '/api/validate') return handleValidate(request);
+    if (url.pathname === '/api/server/render' || url.pathname === '/api/render') return handleRender(request);
+    if (url.pathname === '/api/server/validate' || url.pathname === '/api/validate') return handleValidate(request);
     return Response.json({ error: 'Not found' }, { status: 404 });
   },
 });
