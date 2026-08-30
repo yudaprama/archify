@@ -9,9 +9,21 @@ const SKILL_ROOT = path.resolve(__dirname, '..');
 
 const TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
 
+function readBody(request) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    request.on('data', (chunk) => chunks.push(chunk));
+    request.on('end', () => {
+      try { resolve(JSON.parse(Buffer.concat(chunks).toString())); }
+      catch { reject(new Error('Invalid JSON body')); }
+    });
+    request.on('error', reject);
+  });
+}
+
 function verifyToken(request) {
-  const header = request.headers.get('Authorization');
-  if (!header || !header.startsWith('Bearer ')) return false;
+  const header = request.headers.authorization || request.headers.Authorization || '';
+  if (!header.startsWith('Bearer ')) return false;
   const token = header.slice(7);
   const expected = process.env.ARCHIFY_API_TOKEN;
   if (!expected || token.length !== expected.length) return false;
@@ -25,9 +37,7 @@ function rendererPath(type) {
 }
 
 function rendererFailure(result) {
-  if (result.error) {
-    return { error: `Renderer process could not start: ${result.error.message}`, diagnostics: [] };
-  }
+  if (result.error) return { error: `Renderer process could not start: ${result.error.message}`, diagnostics: [] };
   try {
     const payload = JSON.parse((result.stderr || '').trim());
     if (payload?.ok === false && Array.isArray(payload.diagnostics) && payload.diagnostics.length) {
@@ -40,45 +50,29 @@ function rendererFailure(result) {
   };
 }
 
-export default async function handler(request) {
+export default async function handler(request, response) {
   if (!verifyToken(request)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return response.status(401).json({ error: 'Unauthorized' });
   }
 
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return response.status(405).json({ error: 'Method not allowed' });
   }
 
   let body;
   try {
-    body = await request.json();
+    body = await readBody(request);
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return response.status(400).json({ error: 'Invalid JSON body' });
   }
 
   const { type, specification, quality, repoRoot } = body;
 
   if (!type || !TYPES.has(type)) {
-    return new Response(JSON.stringify({ error: `Invalid type. Expected one of: ${[...TYPES].join(', ')}` }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return response.status(400).json({ error: `Invalid type. Expected one of: ${[...TYPES].join(', ')}` });
   }
-
   if (!specification || typeof specification !== 'object') {
-    return new Response(JSON.stringify({ error: 'Missing or invalid specification object' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return response.status(400).json({ error: 'Missing or invalid specification object' });
   }
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-render-'));
@@ -103,22 +97,14 @@ export default async function handler(request) {
 
     if (result.status !== 0) {
       const failure = rendererFailure(result);
-      return new Response(JSON.stringify({ error: failure.error, diagnostics: failure.diagnostics }), {
-        status: 422,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return response.status(422).json({ error: failure.error, diagnostics: failure.diagnostics });
     }
 
     const html = fs.readFileSync(outputPath, 'utf8');
-    return new Response(html, {
-      status: 200,
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
+    response.setHeader('Content-Type', 'text/html; charset=utf-8');
+    response.send(html);
   } catch (error) {
-    return new Response(JSON.stringify({ error: `Render failed: ${error.message}` }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    response.status(500).json({ error: `Render failed: ${error.message}` });
   } finally {
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
   }
