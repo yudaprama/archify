@@ -1,0 +1,10 @@
+{
+  "name": "archify-root",
+  "private": true,
+  "type": "module",
+  "description": "Root package for Vercel deployment",
+  "scripts": {
+    "dev": "bun run --cwd archify bin/archify.mjs",
+    "test": "bun run --cwd archify test"
+  }
+}

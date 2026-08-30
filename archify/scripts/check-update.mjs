@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import crypto from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';

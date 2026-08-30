@@ -9,21 +9,21 @@
     "archify": "./bin/archify.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "bun": ">=1.1"
   },
   "scripts": {
-    "generate:brand-marks": "node scripts/generate-brand-marks.mjs",
-    "check:brand-marks": "node scripts/generate-brand-marks.mjs --check",
-    "generate:validators": "node scripts/generate-validators.mjs",
-    "check:validators": "node scripts/generate-validators.mjs --check",
-    "check:release-identity": "node ../scripts/check-release-identity.mjs",
-    "build:gallery": "node ../scripts/build-gallery.mjs ../docs",
-    "build:guide": "node ../scripts/build-guide.mjs ../docs/guide.html",
-    "build:start": "node ../scripts/build-start.mjs ../docs/start.html",
-    "build:readme-showcase": "node ../scripts/build-readme-showcase.mjs",
-    "test:webm": "node test/webm-artifact.smoke.mjs && node --test test/site-language-integration.mjs",
-    "test": "npm run check:brand-marks && npm run check:validators && npm run check:release-identity && node test/golden.mjs && node ../scripts/run-tests.mjs",
-    "render:examples": "node scripts/render-examples.mjs ../examples"
+    "generate:brand-marks": "bun scripts/generate-brand-marks.mjs",
+    "check:brand-marks": "bun scripts/generate-brand-marks.mjs --check",
+    "generate:validators": "bun scripts/generate-validators.mjs",
+    "check:validators": "bun scripts/generate-validators.mjs --check",
+    "check:release-identity": "bun ../scripts/check-release-identity.mjs",
+    "build:gallery": "bun ../scripts/build-gallery.mjs ../docs",
+    "build:guide": "bun ../scripts/build-guide.mjs ../docs/guide.html",
+    "build:start": "bun ../scripts/build-start.mjs ../docs/start.html",
+    "build:readme-showcase": "bun ../scripts/build-readme-showcase.mjs",
+    "test:webm": "bun test/webm-artifact.smoke.mjs && bun --test test/site-language-integration.mjs",
+    "test": "bun run check:brand-marks && bun run check:validators && bun run check:release-identity && bun test/golden.mjs && bun ../scripts/run-tests.mjs",
+    "render:examples": "bun scripts/render-examples.mjs ../examples"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
