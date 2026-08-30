@@ -122,7 +122,7 @@ export default async function handler(request, response) {
     const rendererArgs = [rendererPath(type), inputPath, outputPath];
     if (layoutJson) rendererArgs.push('--layout-json');
 
-    const render = spawnSync(process.execPath, rendererArgs, {
+    const render = spawnSync('node', rendererArgs, {
       encoding: 'utf8',
       stdio: 'pipe',
       env,
@@ -145,7 +145,7 @@ export default async function handler(request, response) {
       return response.status(422).json({ ok: false, error: failure.error, diagnostics: failure.diagnostics });
     }
 
-    const check = spawnSync(process.execPath, [checkerPath(), outputPath], {
+    const check = spawnSync('node', [checkerPath(), outputPath], {
       encoding: 'utf8',
       stdio: 'pipe',
       cwd: SKILL_ROOT,

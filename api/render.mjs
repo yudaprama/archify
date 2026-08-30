@@ -88,7 +88,7 @@ export default async function handler(request, response) {
       ...(repoRoot ? { ARCHIFY_REPO_ROOT: repoRoot } : {}),
     };
 
-    const result = spawnSync(process.execPath, [rendererPath(type), inputPath, outputPath], {
+    const result = spawnSync('node', [rendererPath(type), inputPath, outputPath], {
       encoding: 'utf8',
       stdio: 'pipe',
       env,
